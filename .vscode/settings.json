@@ -1,0 +1,7 @@
+{
+    "verilog.formatting.verilogFormat.path": "/opt/verilog-format/verilog-format",
+    "verilog.formatting.verilogFormat.settings": "${workspaceFolder}/.verilog-format.properties",
+    "[verilog]": {
+        "editor.defaultFormatter": "mshr-h.veriloghdl"
+    },
+}
