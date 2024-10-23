@@ -4,4 +4,11 @@
     "[verilog]": {
         "editor.defaultFormatter": "mshr-h.veriloghdl"
     },
+    "verilog.formatting.verilogHDL.formatter": "verible-verilog-format",
+    "verilog.formatting.veribleVerilogFormatter.arguments": "--indentation_spaces=4",
+    "verible.arguments": [
+        "--rules=-always-comb",
+        "--file_list_path=${workspaceFolder}/verible.filelist",
+        "--indentation_spaces=4"
+    ],
 }
