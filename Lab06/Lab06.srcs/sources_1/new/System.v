@@ -21,28 +21,40 @@
 
 
 module System (
-    output [6:0] seg,   // 7-segment display output
-    output       dp,    // Decimal point output
-    output [3:0] an,    // Anode control for 7-segment display
-    output       RsTx,  // UART transmit output
-    input        RsRx,  // UART receive input
-    input        clk    // Main clock input
+    output wire [6:0] seg,   // 7-segment display output
+    output wire       dp,    // Decimal point output
+    output wire [3:0] an,    // Anode control for 7-segment display
+    output wire       RsTx,  // UART transmit output
+    input  wire       RsRx,  // UART receive input
+    input  wire       clk    // Main clock input
 );
-    wire [7:0] data_out;
+
+    // Local Params
+    localparam integer SystemClockFreqency = 100_000_000;  // system clock 10 ns
+    localparam integer BaudRate = 115200;  // adjust to you baud rate
+    localparam integer SamplingRate = 16;  // even value expect 2++
+    localparam integer SevenSegmentDigitInputWidth = 8;  // ascii bit counts
+
+
+    // Uart module to receive, transmit data and status
+    wire [7:0] data_out;  // ascii
     wire receiving, received;
 
-    Uart uart (
-        clk,
-        RsRx,
-        RsTx,
-        data_out,
-        receiving,
-        received
+    Uart #(
+        .CLOCK_FREQ   (SystemClockFreqency),
+        .BAUD_RATE    (BaudRate),
+        .SAMPLING_RATE(SamplingRate)
+    ) uart (
+        .clk      (clk),
+        .RsRx     (RsRx),
+        .RsTx     (RsTx),
+        .data_out (data_out),
+        .receiving(receiving),
+        .received (received)
     );
 
-    reg [7:0] num3, num2, num1, num0;
-    wire an3, an2, an1, an0;
-
+    // init Digit to invalid ascii value to make 7segment off
+    reg [SevenSegmentDigitInputWidth - 1 : 0] num3, num2, num1, num0;
     initial begin
         num3 = 0;
         num2 = 0;
@@ -50,6 +62,7 @@ module System (
         num0 = 0;
     end
 
+    // when received shift number Right -> Left
     always @(posedge received) begin
         num0 <= data_out;
         num1 <= num0;
@@ -57,39 +70,31 @@ module System (
         num3 <= num2;
     end
 
-    assign an = {an3, an2, an1, an0};
+    // quad 7segments display controller
+    Quad7SegDisplay #(
+        .INPUT_WIDTH(SevenSegmentDigitInputWidth)
+    ) q7seg (
+        .seg   (seg),
+        .dp    (dp),
+        .an    (an),
+        .digit3(num3),
+        .digit2(num2),
+        .digit1(num1),
+        .digit0(num0),
+        .clk   (tClk[18])
+    );
 
-    // divide clock 100MHz (10^9) to ~200Hz
-    wire targetClk;
-    wire [17:0] tClk;
+    // divide clock 100MHz (10^8) to ~200Hz
+    wire [18:0] tClk;
     assign tClk[0] = clk;
     genvar i;
     generate
-        for (i = 0; i < 17; i = i + 1) begin : gen_clock
+        for (i = 0; i < 18; i = i + 1) begin : gen_clock
             ClkDivider clockDiv (
-                tClk[i+1],
-                tClk[i]
+                .out(tClk[i+1]),
+                .in (tClk[i])
             );
         end
     endgenerate
-
-    ClkDivider clockDivTarget (
-        targetClk,
-        tClk[17]
-    );
-
-    Quad7SegDisplay q7seg (
-        seg,
-        dp,
-        an3,
-        an2,
-        an1,
-        an0,
-        num3,
-        num2,
-        num1,
-        num0,
-        targetClk
-    );
 
 endmodule

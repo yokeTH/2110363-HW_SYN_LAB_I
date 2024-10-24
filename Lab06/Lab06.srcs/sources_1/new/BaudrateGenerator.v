@@ -21,12 +21,12 @@
 
 
 module BaudrateGenerator #(
-    parameter integer CLOCK_FREQ = 100_000_000,
-    parameter integer BAUD_RATE  = 9600,
+    parameter integer CLOCK_FREQ    = 100_000_000,
+    parameter integer BAUD_RATE     = 9600,
     parameter integer SAMPLING_RATE = 16
 ) (
-    input wire clk,
-    output reg baud
+    input  wire clk,
+    output reg  baud
 );
     // divide the clock frequency by the baud rate and the sampling rate
     // and divide by 2 to get low and high in 1 sampling rate
@@ -36,7 +36,7 @@ module BaudrateGenerator #(
         counter = counter + 1;
         if (counter == CounterMax) begin
             counter = 0;
-            baud = ~baud;
+            baud    = ~baud;
         end
     end
 

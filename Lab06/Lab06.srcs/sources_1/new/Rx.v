@@ -23,14 +23,14 @@
 module Rx #(
     parameter integer SAMPLING_RATE = 16
 ) (
-    input clk,
-    input bit_in,
-    output reg received,
-    output reg [7:0] data_out,
-    output reg receiving = 0
+    input  wire       clk,
+    input  wire       bit_in,
+    output reg        received,
+    output reg  [7:0] data_out,
+    output reg        receiving = 0
 );
 
-    reg last_bit;
+    reg       last_bit;
     reg [7:0] count;
 
     localparam integer IntervalSignalCount = SAMPLING_RATE / 2;
@@ -49,10 +49,10 @@ module Rx #(
         // 2 * i + 1 is the middle of the signal
         // ignored i = 0 because it is the start bit
         case (count)
-            IntervalSignalCount * 3: data_out[0] <= bit_in;  // Data bit 0
-            IntervalSignalCount * 5: data_out[1] <= bit_in;  // Data bit 1
-            IntervalSignalCount * 7: data_out[2] <= bit_in;  // Data bit 2
-            IntervalSignalCount * 9: data_out[3] <= bit_in;  // Data bit 3
+            IntervalSignalCount * 3:  data_out[0] <= bit_in;  // Data bit 0
+            IntervalSignalCount * 5:  data_out[1] <= bit_in;  // Data bit 1
+            IntervalSignalCount * 7:  data_out[2] <= bit_in;  // Data bit 2
+            IntervalSignalCount * 9:  data_out[3] <= bit_in;  // Data bit 3
             IntervalSignalCount * 11: data_out[4] <= bit_in;  // Data bit 4
             IntervalSignalCount * 13: data_out[5] <= bit_in;  // Data bit 5
             IntervalSignalCount * 15: data_out[6] <= bit_in;  // Data bit 6
@@ -61,7 +61,7 @@ module Rx #(
                 received  <= 1;
                 receiving <= 0;
             end
-            default: ;
+            default:                  ;
         endcase
     end
 

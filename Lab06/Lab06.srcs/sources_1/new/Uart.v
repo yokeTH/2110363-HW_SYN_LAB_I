@@ -21,24 +21,24 @@
 
 
 module Uart #(
-    parameter integer CLOCK_FREQ = 100_000_000,
-    parameter integer BAUD_RATE = 9600,
+    parameter integer CLOCK_FREQ    = 100_000_000,
+    parameter integer BAUD_RATE     = 9600,
     parameter integer SAMPLING_RATE = 16
 ) (
-    input clk,
-    input RsRx,
-    output RsTx,
+    input  wire       clk,
+    input  wire       RsRx,
+    output wire       RsTx,
     output wire [7:0] data_out,
-    output receiving,
-    output received
+    output wire       receiving,
+    output wire       received
 );
     reg en, last_rec;
     reg [7:0] data_in;
     wire sent, received, baud;
 
     BaudrateGenerator #(
-        .CLOCK_FREQ(CLOCK_FREQ),
-        .BAUD_RATE(BAUD_RATE),
+        .CLOCK_FREQ   (CLOCK_FREQ),
+        .BAUD_RATE    (BAUD_RATE),
         .SAMPLING_RATE(SAMPLING_RATE)
     ) baudrate_gen (
         .clk (clk),
@@ -48,28 +48,28 @@ module Uart #(
     Rx #(
         .SAMPLING_RATE(SAMPLING_RATE)
     ) receiver (
-        .clk(baud),
-        .bit_in(RsRx),
-        .received(received),
-        .data_out(data_out),
+        .clk      (baud),
+        .bit_in   (RsRx),
+        .received (received),
+        .data_out (data_out),
         .receiving(receiving)
     );
 
     Tx #(
         .SAMPLING_RATE(SAMPLING_RATE)
     ) transmitter (
-        .clk(baud),
+        .clk          (baud),
         .data_transmit(data_in),
-        .ena(en),
-        .sent(sent),
-        .bit_out(RsTx)
+        .ena          (en),
+        .sent         (sent),
+        .bit_out      (RsTx)
     );
 
     always @(posedge baud) begin
         if (en) en = 0;
         if (~last_rec & received) begin
             data_in = data_out;
-            en = 1;
+            en      = 1;
         end
         // send one time
         last_rec = received;

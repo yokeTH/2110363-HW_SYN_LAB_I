@@ -21,15 +21,15 @@
 
 
 module ClkDivider (
-    output reg  out,
-    input  wire in
+    input  wire in,
+    output reg  out
 );
 
-  initial begin
-    out = 0;
-  end
+    initial begin
+        out = 0;
+    end
 
-  always @(posedge in) begin
-    out <= ~out;
-  end
+    always @(posedge in) begin
+        out <= ~out;
+    end
 endmodule

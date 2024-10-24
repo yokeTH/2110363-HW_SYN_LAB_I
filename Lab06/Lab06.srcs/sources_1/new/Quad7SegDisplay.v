@@ -20,58 +20,57 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Quad7SegDisplay (
-    output reg [6:0] seg,
-    output reg dp,
-    output reg an3,
-    output reg an2,
-    output reg an1,
-    output reg an0,
-    input [7:0] num3,
-    input [7:0] num2,
-    input [7:0] num1,
-    input [7:0] num0,
-    input clk
+module Quad7SegDisplay #(
+    parameter integer INPUT_WIDTH = 8
+) (
+    output reg  [            6:0] seg,
+    output reg                    dp,
+    output reg  [            3:0] an,
+    input  wire [INPUT_WIDTH-1:0] digit3,  // most left
+    input  wire [INPUT_WIDTH-1:0] digit2,
+    input  wire [INPUT_WIDTH-1:0] digit1,
+    input  wire [INPUT_WIDTH-1:0] digit0,  // most right
+    input  wire                   clk
 );
 
-    reg [1:0] state;
-    reg  [7:0] present_num;
-    reg  [3:0] display_enable;
-    wire [6:0] decode_out;
+    reg  [            1:0] state;
+    reg  [INPUT_WIDTH-1:0] present_digit;
+    reg  [            3:0] display_enable;
+    wire [            6:0] decode_out;
 
     AsciiToSiekoo decoder (
-        decode_out,
-        present_num
+        .out(decode_out),
+        .in (present_digit)
     );
 
-    always @(posedge clk) begin: state_change
+    always @(posedge clk) begin : state_change
         state <= state + 1;
 
         case (state)
             2'b00: begin
-                present_num    <= num0;
+                present_digit  <= digit0;
                 display_enable <= 4'b0001;
             end
             2'b01: begin
-                present_num    <= num1;
+                present_digit  <= digit1;
                 display_enable <= 4'b0010;
             end
             2'b10: begin
-                present_num    <= num2;
+                present_digit  <= digit2;
                 display_enable <= 4'b0100;
             end
             2'b11: begin
-                present_num    <= num3;
+                present_digit  <= digit3;
                 display_enable <= 4'b1000;
             end
-            default:;
+            default: ;
         endcase
-    end: state_change
+    end : state_change
 
     always @(*) begin
-        {an3, an2, an1, an0} <= ~display_enable;
-        dp                   <= 1;
-        seg                  <= decode_out;
+        an  <= ~display_enable;
+        dp  <= 1;
+        seg <= decode_out;
     end
 
 
