@@ -27,7 +27,7 @@ module System (
     input        clk
 );
 
-    localparam integer SevenSegmentDigitInputWidth = 4;  // ascii bit counts
+    localparam integer SevenSegmentDigitInputWidth = 4;  // hex bit counts
 
     reg [SevenSegmentDigitInputWidth - 1 : 0] num3, num2, num1, num0;
 
