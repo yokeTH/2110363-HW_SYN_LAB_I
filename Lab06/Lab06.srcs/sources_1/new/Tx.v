@@ -27,11 +27,11 @@ module Tx #(
     input  wire [7:0] data_transmit,
     input  wire       ena,
     output reg        sent,
+    output reg        sending = 0,
     output reg        bit_out
 );
 
     reg       last_ena;
-    reg       sending = 0;
     reg [7:0] count;
     reg [7:0] temp;
 

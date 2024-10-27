@@ -38,7 +38,10 @@ module System (
 
     // Uart module to receive, transmit data and status
     wire [7:0] data_out;  // ascii
-    wire receiving, received;
+    wire       receiving;
+    wire       received;
+    wire       sent;
+    wire       sending;
 
     Uart #(
         .CLOCK_FREQ   (SystemClockFreqency),
@@ -50,7 +53,9 @@ module System (
         .RsTx     (RsTx),
         .data_out (data_out),
         .receiving(receiving),
-        .received (received)
+        .received (received),
+        .sent     (sent),
+        .sending  (sending)
     );
 
     // init Digit to invalid ascii value to make 7segment off

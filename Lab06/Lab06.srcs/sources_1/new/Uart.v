@@ -30,11 +30,14 @@ module Uart #(
     output wire       RsTx,
     output wire [7:0] data_out,
     output wire       receiving,
-    output wire       received
+    output wire       received,
+    output wire       sent,
+    output wire       sending
 );
-    reg en, last_rec;
-    reg [7:0] data_in;
-    wire sent, received, baud;
+    reg        en;
+    reg        last_rec;
+    reg  [7:0] data_in;
+    wire       baud;
 
     BaudrateGenerator #(
         .CLOCK_FREQ   (CLOCK_FREQ),
@@ -62,7 +65,8 @@ module Uart #(
         .data_transmit(data_in),
         .ena          (en),
         .sent         (sent),
-        .bit_out      (RsTx)
+        .bit_out      (RsTx),
+        .sending      (sending)
     );
 
     always @(posedge baud) begin
