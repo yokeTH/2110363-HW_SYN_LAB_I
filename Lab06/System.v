@@ -75,18 +75,30 @@ module System (
         num3 <= num2;
     end
 
+    // Decode Data
+    wire [SevenSegmentDigitInputWidth-1:0] decode_in;
+    wire [                            6:0] decode_out;
+
+    AsciiToSiekoo decoder (
+        .out(decode_out),
+        .in (decode_in)
+    );
+
     // quad 7segments display controller
+
     Quad7SegDisplay #(
         .INPUT_WIDTH(SevenSegmentDigitInputWidth)
     ) q7seg (
-        .seg   (seg),
-        .dp    (dp),
-        .an    (an),
-        .digit3(num3),
-        .digit2(num2),
-        .digit1(num1),
-        .digit0(num0),
-        .clk   (tClk[18])
+        .seg          (seg),
+        .dp           (dp),
+        .an           (an),
+        .present_digit(decode_in),
+        .segment_data (decode_out),
+        .digit3       (num3),
+        .digit2       (num2),
+        .digit1       (num1),
+        .digit0       (num0),
+        .clk          (tClk[18])
     );
 
     // divide clock 100MHz (10^8) to ~200Hz

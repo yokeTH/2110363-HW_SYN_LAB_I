@@ -23,25 +23,22 @@
 module Quad7SegDisplay #(
     parameter integer INPUT_WIDTH = 8
 ) (
-    output reg  [            6:0] seg,
-    output reg                    dp,
-    output reg  [            3:0] an,
-    input  wire [INPUT_WIDTH-1:0] digit3,  // most left
+    output wire [            6:0] seg,
+    output wire                   dp,
+    output wire [            3:0] an,
+    output reg  [INPUT_WIDTH-1:0] present_digit,
+    input  wire [            6:0] segment_data,
+    input  wire [INPUT_WIDTH-1:0] digit3,         // most left
     input  wire [INPUT_WIDTH-1:0] digit2,
     input  wire [INPUT_WIDTH-1:0] digit1,
-    input  wire [INPUT_WIDTH-1:0] digit0,  // most right
+    input  wire [INPUT_WIDTH-1:0] digit0,         // most right
     input  wire                   clk
 );
 
-    reg  [            1:0] state;
-    reg  [INPUT_WIDTH-1:0] present_digit;
-    reg  [            3:0] display_enable;
-    wire [            6:0] decode_out;
+    reg  [1:0] state;
+    reg  [3:0] display_enable;
+    wire [6:0] decode_out;
 
-    AsciiToSiekoo decoder (
-        .out(decode_out),
-        .in (present_digit)
-    );
 
     always @(posedge clk) begin : state_change
         state <= state + 1;
@@ -67,11 +64,9 @@ module Quad7SegDisplay #(
         endcase
     end
 
-    always @(*) begin
-        an  <= ~display_enable;
-        dp  <= 1;
-        seg <= decode_out;
-    end
+    assign seg = segment_data;
+    assign an  = ~display_enable;
+    assign dp  = 1;
 
 
 endmodule
