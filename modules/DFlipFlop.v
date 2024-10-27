@@ -27,7 +27,7 @@ module DFlipFlop (
     input  wire d
 );
 
-    always @(posedge clk or nreset) begin
+    always @(posedge clk) begin
         if (nreset == 1) begin
             q = d;
         end else begin

@@ -20,15 +20,19 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module SinglePulser(output reg out,
-                    input in,
-                    input clk);
-    
+module SinglePulser (
+    output reg out,
+    input      in,
+    input      clk
+);
+
     reg state;
-    
+
     always @(posedge clk) begin
         out = 0;
-        case ({state, in})
+        case ({
+            state, in
+        })
             2'b01: begin
                 out   = 1;
                 state = 1;
@@ -36,6 +40,7 @@ module SinglePulser(output reg out,
             2'b10: begin
                 state = 0;
             end
+            default:;
         endcase
     end
 endmodule
