@@ -6,7 +6,7 @@ Hardware Synthesis Lab I course from Chulalongkorn University.
 1. [Repository Structure](#repository-structure)
 2. [Usage](#usage)
 3. [Contributing](#contributing)
-4. [Thank You](#thank-you)
+4. [Thank You](#thank-you-to)
 5. [License](#license)
 6. [TODO](#todo)
 
@@ -45,12 +45,12 @@ To run the synthesis for `Lab6`:
 
 Repeat similar steps for other labs, referring to their respective `README.md` files for specific instructions.
 
-## License
-
-This project is licensed under the [BSD 3-Clause](./LICENSE) License.
-
 ## Thank You To
+
 We would like to extend our gratitude to the [reference repository](https://github.com/raviporna/HWSYNLAB2021/tree/main) for providing valuable resources and inspiration for this project.
+
+## License
+This project is licensed under the [BSD 3-Clause](./LICENSE) License.
 
 ## TODO
 - [ ] upload `pdf` files
