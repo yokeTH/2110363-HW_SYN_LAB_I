@@ -20,37 +20,40 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module testDFlipFlop();
-    reg clk, nreset, d;
+module testDFlipFlop ();
+    reg  clk;
+    reg  nreset;
+    reg  d;
     wire q;
-    DFlipFlop D1(q, clk, nreset, d);
-    
-    
+
+    DFlipFlop D1 (
+        .q     (q),
+        .clk   (clk),
+        .nreset(nreset),
+        .d     (d)
+    );
+
+
     always @(*) begin
-        #10
-        clk = ~ clk;
+        #10 clk <= ~clk;
     end
-    
+
     initial begin
-        #0
-        d      = 0;
-        clk    = 0;
-        nreset = 0;
-        
-        #50
-        nreset = 1;
-        
-        #100
-        nreset = 0;
-        
+        #0 d <= 0;
+        clk    <= 0;
+        nreset <= 0;
+
+        #50 nreset <= 1;
+
+        #100 nreset <= 0;
+
         #200;
-        nreset = 1;
-        
-        #1000
-        $finish;
+        nreset <= 1;
+
+        #1000 $finish;
     end
-    
+
     always @(*) begin
-        #8 d = ~ d;
+        #8 d <= ~d;
     end
 endmodule

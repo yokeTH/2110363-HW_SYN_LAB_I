@@ -20,34 +20,39 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module testShiftAB();
-    wire[1:0] q1, q2;
-    reg clock, d;
-    
-    shiftA s1(q1,clock,d);
-    shiftB s2(q2,clock,d);
-    
+module testShiftAB ();
+    wire [1:0] q1;
+    wire [1:0] q2;
+
+    reg        clock;
+    reg        d;
+
+    shiftA s1 (
+        .q  (q1),
+        .clk(clock),
+        .d  (d)
+    );
+    shiftB s2 (
+        .q  (q2),
+        .clk(clock),
+        .d  (d)
+    );
+
     always @(*) begin
-        #5
-        clock = ~clock;
+        #5 clock <= ~clock;
     end
-    
+
     initial begin
-        #0
-        clock = 0;
-        d     = 0;
-        
-        #5
-        d = 1;
-        
-        #35
-        d = 0;
-        
-        #50
-        $finish;
+        #0 clock <= 0;
+        d <= 0;
+
+        #5 d <= 1;
+
+        #35 d <= 0;
+
+        #50 $finish;
     end
     always @(*) begin
-        #8
-        d = ~d;
+        #8 d <= ~d;
     end
 endmodule

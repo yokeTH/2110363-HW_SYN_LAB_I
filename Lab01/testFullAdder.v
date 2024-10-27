@@ -20,62 +20,71 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module testFullAdder();
-    reg a,b,cin;
-    wire cout,s;
-    
-    
-    fullAdder a1(cout,s,a,b,cin);
-    
-    initial
-    begin
-        $monitor("time %t: {%b %b} <- {%d %d %d}", $time,cout,s,a,b,cin);
+module testFullAdder ();
+    reg  a;
+    reg  b;
+    reg  cin;
+
+    wire cout;
+    wire s;
+
+
+    fullAdder a1 (
+        .cout(cout),
+        .s   (s),
+        .a   (a),
+        .b   (b),
+        .c   (cin)
+    );
+
+    initial begin
+        $monitor("time %t: {%b %b} <- {%d %d %d}", $time, cout, s, a, b, cin);
         a   = 0;
         b   = 0;
         cin = 0;
-        
+
         #10;
-        
+
         a   = 1;
         b   = 0;
         cin = 0;
-        
+
         #10;
-        
+
         a   = 0;
         b   = 1;
         cin = 0;
-        
+
         #10;
-        
+
         a   = 1;
         b   = 1;
         cin = 0;
-        
+
         #10;
-        
+
         a   = 0;
         b   = 0;
         cin = 1;
-        
+
         #10;
-        
+
         a   = 1;
         b   = 0;
         cin = 1;
-        
+
         #10;
-        
+
         a   = 0;
         b   = 1;
         cin = 1;
-        
+
         #10;
-        
+
         a   = 1;
         b   = 1;
         cin = 1;
-        
+
         #10;
         $finish;
     end
