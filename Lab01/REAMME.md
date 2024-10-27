@@ -1,9 +1,6 @@
 # Lab 01
 
-## Module Hierarchy and Dependency
-
-
-The following list outlines the hierarchical structure of the modules:
+## Simulation
 
 ### [**testDFlipFlip**](./testDFlipFlop.v)
 - [**DFlipFlop**](../modules/DFlipFlop.v)

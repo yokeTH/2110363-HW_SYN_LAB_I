@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module System (
+module Lab2 (
     output wire [6:0] seg,
     output wire       dp,
     output wire [3:0] an,

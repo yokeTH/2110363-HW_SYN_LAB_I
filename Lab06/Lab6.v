@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module System (
+module Lab2 (
     output wire [6:0] seg,   // 7-segment display output
     output wire       dp,    // Decimal point output
     output wire [3:0] an,    // Anode control for 7-segment display

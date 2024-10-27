@@ -8,6 +8,7 @@ Hardware Synthesis Lab I course from Chulalongkorn University.
 3. [Contributing](#contributing)
 4. [Thank You](#thank-you)
 5. [License](#license)
+6. [TODO](#todo)
 
 ## Repository Structure
 
@@ -17,10 +18,12 @@ The repository is organized as follows:
 ├── Lab1/
 │   ├── README.md
 │   ├── top_module.v
+│   ├── constrains.xdc
 │   └── ...
 ├── Lab2/
 │   ├── README.md
 │   ├── top_module.v
+│   ├── constrains.xdc
 │   └── ...
 └── ...
 ```
@@ -34,8 +37,8 @@ Follow the instructions in each lab's README file to complete the assignments. E
 To run the synthesis for `Lab6`:
 
 1. Open Vivado Design Suite.
-2. Navigate to the `Lab6` directory.
-3. Open the project file or create a new project and add the `System.v` file.
+2. Navigate to the [Lab6](./Lab06/) directory.
+3. Open the project file or create a new project and add the `Lab6.v` file.
 4. Add any necessary constraint files as specified in the `README.md` of Lab6.
 5. Run the synthesis and implementation processes.
 6. Generate the bitstream and program the FPGA.
@@ -44,8 +47,11 @@ Repeat similar steps for other labs, referring to their respective `README.md` f
 
 ## License
 
-This project is licensed under the BSD 3-Clause License License.
+This project is licensed under the [BSD 3-Clause](./LICENSE) License.
 
-## Thank You
+## Thank You To
+We would like to extend our gratitude to the [reference repository](https://github.com/raviporna/HWSYNLAB2021/tree/main) for providing valuable resources and inspiration for this project.
 
-Thank you for using this repository. We hope it helps you in your learning journey. If you have any questions or feedback, feel free to reach out.
+## TODO
+- [ ] upload `pdf` files
+- [ ] upload lab4 and lab5

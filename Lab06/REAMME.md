@@ -2,14 +2,11 @@
 
 ## Module Hierarchy and Dependency
 
-
-The following list outlines the hierarchical structure of the modules:
-
-### [**System**](./System.v)
-- [**BaudrateGenerator**]()
-- [**ClkDivider**]()
-- [**Quad7SegDisplay**]()
-  - [**AsciiToSiekoo**]()
-- [**Uart**]()
-  - [**Tx**]()
-  - [**Rx**]()
+### [**Lab6**](./Lab6.v)
+- AsciiToSiekoo
+- ClkDivider
+- Quad7SegDisplay
+- Uart
+  - BaudrateGenerator
+  - Rx
+  - Tx
