@@ -65,7 +65,7 @@ module Quad7SegDisplay #(
             end
             default: ;
         endcase
-    end : state_change
+    end
 
     always @(*) begin
         an  <= ~display_enable;
