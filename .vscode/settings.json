@@ -7,7 +7,7 @@
     "verilog.formatting.verilogHDL.formatter": "verible-verilog-format",
     "verilog.formatting.veribleVerilogFormatter.arguments": "--indentation_spaces=4 --case_items_alignment=align --assignment_statement_alignment=align --class_member_variable_alignment=align --distribution_items_alignment=align --enum_assignment_statement_alignment=align --formal_parameters_alignment=align --module_net_variable_alignment=align --named_parameter_alignment=align --named_port_alignment=align --port_declarations_alignment=align --struct_union_members_alignment=align",
     "verible.arguments": [
-        "--rules=-always-comb,-unpacked-ordering",
+        "--rules=-always-comb,-unpacked-dimensions-range-ordering,-explicit-parameter-storage-type",
         "--file_list_path=${workspaceFolder}/verible.filelist",
         "--indentation_spaces=4"
     ],

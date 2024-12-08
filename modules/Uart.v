@@ -32,12 +32,12 @@ module Uart #(
     output wire       receiving,
     output wire       received,
     output wire       sent,
-    output wire       sending
+    output wire       sending,
+    output wire       baud
 );
-    reg        en;
-    reg        last_rec;
-    reg  [7:0] data_in;
-    wire       baud;
+    reg       en;
+    reg       last_rec;
+    reg [7:0] data_in;
 
     BaudrateGenerator #(
         .CLOCK_FREQ   (CLOCK_FREQ),

@@ -26,12 +26,12 @@ module BaudrateGenerator #(
     parameter integer SAMPLING_RATE = 16
 ) (
     input  wire clk,
-    output reg  baud
+    output reg  baud = 0
 );
     // divide the clock frequency by the baud rate and the sampling rate
     // and divide by 2 to get low and high in 1 sampling rate
     localparam integer CounterMax = CLOCK_FREQ / BAUD_RATE / SAMPLING_RATE / 2;
-    integer counter;
+    integer counter = 0;
     always @(posedge clk) begin
         counter = counter + 1;
         if (counter == CounterMax) begin
