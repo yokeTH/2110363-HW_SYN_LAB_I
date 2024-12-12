@@ -2,20 +2,22 @@
 
 module TextDisplayWithBufferWithUartWithFifo_tb_2;
     // Inputs
-    reg        clk;
-    reg        btnU;
-    reg        RsRx;
-    reg  [7:0] sw;
-    reg        btnC;
+    reg         clk;
+    reg         btnU;
+    reg         btnD;
+    reg         btnL;
+    reg         btnC;
+    reg         btnR;
+    reg         RsRx;
+    reg  [12:0] sw;
 
     // Outputs
-    wire       RsTx;
-    wire       Hsync;
-    wire       Vsync;
-    wire [3:0] vgaRed;
-    wire [3:0] vgaGreen;
-    wire [3:0] vgaBlue;
-
+    wire        RsTx;
+    wire        Hsync;
+    wire        Vsync;
+    wire [ 3:0] vgaRed;
+    wire [ 3:0] vgaGreen;
+    wire [ 3:0] vgaBlue;
 
     // Test parameters
     parameter CLOCK_PERIOD = 10;  // 10ns (100MHz)
@@ -24,28 +26,9 @@ module TextDisplayWithBufferWithUartWithFifo_tb_2;
     parameter TEST_DURATION = 100_000_000;  // 100ms simulation
 
     // File handle for VGA output log
-    integer       vga_log;
+    integer vga_log;
 
-    // Test message - hello world with newline
-    reg     [7:0] test_msg[0:13];
-    initial begin
-        test_msg[0]  = "H";
-        test_msg[1]  = "e";
-        test_msg[2]  = "l";
-        test_msg[3]  = "l";
-        test_msg[4]  = "o";
-        test_msg[5]  = " ";
-        test_msg[6]  = "W";
-        test_msg[7]  = "o";
-        test_msg[8]  = "r";
-        test_msg[9]  = "l";
-        test_msg[10] = "d";
-        test_msg[11] = "!";
-        test_msg[12] = 8'h0D;  // CR
-        test_msg[13] = 8'h0A;  // LF
-    end
-
-    wire JB;
+    wire    JB;
 
     // UUT instantiation
     TextDisplayWithBufferWithUartWithFifo_2 uut (
@@ -64,9 +47,12 @@ module TextDisplayWithBufferWithUartWithFifo_tb_2;
         .dp      (),          // Unused
         .an      (),          // Unused
         .sw      (sw),
-        .btnC    (btnC),
+        .btnD    (btnD),
         .JB      (JB),
-        .JC      (JB)         // Loop back JB to JC
+        .JC      (JB),        // Loop back JB to JC
+        .btnL    (btnL),
+        .btnC    (btnC),
+        .btnR    (btnR)
     );
 
     // Clock generation
@@ -77,91 +63,94 @@ module TextDisplayWithBufferWithUartWithFifo_tb_2;
         #(CLOCK_PERIOD / 2);
     end
 
-    // UART transmission task
-    task send_uart_byte;
-        input [7:0] data;
-        integer i;
+    // Task to press a button
+    task press_button;
+        input [2:0] button;
         begin
-            // Start bit
-            RsRx = 0;
-            #UART_PERIOD;
-
-            // Data bits (LSB first)
-            for (i = 0; i < 8; i = i + 1) begin
-                RsRx = data[i];
-                #UART_PERIOD;
-            end
-
-            // Stop bit
-            RsRx = 1;
-            #UART_PERIOD;
-
-            // Extra delay after stop bit
-            #UART_PERIOD;
+            case (button)
+                3'b001: btnL = 1;
+                3'b010: btnC = 1;
+                3'b100: btnR = 1;
+            endcase
+            #20;
+            case (button)
+                3'b001: btnL = 0;
+                3'b010: btnC = 0;
+                3'b100: btnR = 0;
+            endcase
+            #10000;
         end
     endtask
 
-    // Test stimulus
-    // initial begin
-        // Initialize log file
+    task press_send_btn;
+        begin
+            btnD = 1;
+            #10 btnD = 0;
+            #10000;
+        end
+    endtask
 
+    task reset_color;
+        begin
+            // Reset color by setting 4 MLB to 0000 and pressing all color buttons
+            sw <= 13'b0000101000001;  // Base configuration with color reset
 
-    //     // Initialize signals
-    //     btnU = 1;
-    //     RsRx = 1;  // UART idle state is high
-    //     btnC <= 0;
+            // Press all color buttons to reset
+            #10;
+            press_button(3'b001);  // Red (Left button)
+            #10;
+            press_button(3'b010);  // Green (Center button)
+            #10;  // Blue (Right button)
+            press_button(3'b100);
+            // Send the reset configuration
+            press_send_btn();
+            #10000;
+        end
+    endtask
 
-    //     // Reset pulse
-    //     #1000 btnU = 0;
-    //     #1000;
+    // Task to send ASCII character via switch
+    task send_ascii_via_sw;
+        input [7:0] ascii;
+        begin
+            sw[7:0] = ascii;  // Set ASCII character
+            press_send_btn();  // Send the configuration
+            #(CHAR_DELAY);  // Apply character delay
+        end
+    endtask
 
-    //     // Send test message via UART twice to test wrapping
-    //     // repeat (1) begin
-    //     //     for (integer i = 0; i < 1; i = i + 1) begin
-    //     //         send_uart_byte(test_msg[i]);
-    //     //         #CHAR_DELAY;
-    //     //     end
-    //     //     #(CHAR_DELAY * 2);
-    //     // end
-    //     sw   <= 8'b01000001;
-    //     #10 btnC <= 1;
-    //     btnC <= 0;
-    //     // Wait for display to stabilize
-    //     #TEST_DURATION;
-
-    //     // Close log and end simulation
-    //     $fclose(vga_log);
-    //     $finish;
-    // end
-
+    // Color and ASCII test sequence
     initial begin
         // Initialize signals
+        btnR <= 0;
+        btnC <= 0;
+        btnL <= 0;
         btnU = 1;
         RsRx = 1;  // UART idle state is high
-        btnC <= 0;
-        sw   <= 8'b01000001;  // Set a specific switch configuration
+        btnD <= 0;
+        sw   <= 13'b0000101000001;  // Base switch configuration
 
-        // Reset pulse
+
+        // Reset
         #1000 btnU = 0;
-        #1000000;
+        #10000;
+        press_button(3'b001);
+        press_button(3'b010);
+        press_button(3'b100);
+        // Test all displayable ASCII characters
+        for (integer ascii = 32; ascii < 127; ascii = ascii + 1) begin
+            // Set base configuration
+            sw[12:9] = 4'b0000;  // Default color
+            sw[8]    = 1;  // Default language
 
-        // Trigger switch reading
-        #10 btnC <= 1;
-        #10 btnC <= 0;
+            // Send ASCII character via switch
+            send_ascii_via_sw(ascii);
 
-        #100000;
+            // Send the configuration
+            #1000000;
+        end
 
-        #10 btnC <= 1;
-        #10 btnC <= 0;
-
-        #100000;
-
-        sw   <= 8'b01000010;  // Set a specific switch configuration
-
-        #10000000;
-
-        #10 btnC <= 1;
-        #10 btnC <= 0;
+        // Final reset
+        reset_color();
 
         // Wait for display to stabilize
         #TEST_DURATION;
@@ -169,7 +158,7 @@ module TextDisplayWithBufferWithUartWithFifo_tb_2;
         $finish;
     end
 
-
+    // VGA log file initialization
     initial begin
         vga_log = $fopen("vga_output.txt", "w");
         if (vga_log == 0) begin
@@ -178,9 +167,7 @@ module TextDisplayWithBufferWithUartWithFifo_tb_2;
         end
     end
 
-
     // VGA signal logging
-    // Format: "time ns: hs vs red green blue"
     always @(posedge clk) begin
         if (uut.display.sync_unit.p_tick) begin  // Only log when pixel clock is active
             $fwrite(vga_log, "%0d ns: %b %b %04b %04b %04b\n", $time,  // Current simulation time

@@ -6,11 +6,11 @@ def edit_char_mem(filename):
         filename (str): Path to the .mem file.
     """
     # Get character hexadecimal code from the user
-    char_hex = input("Enter the character hex code (e.g., 41 for 'A'): ").strip()
+    char_hex = input("Enter the character dec code (e.g., 41 for 'A'): ").strip()
 
     try:
         # Convert hex to decimal
-        char_code = int(char_hex, 16)
+        char_code = int(char_hex)
     except ValueError:
         print("Invalid hexadecimal code. Please try again.")
         return
@@ -68,5 +68,5 @@ def edit_char_mem(filename):
     print(f"Character {char_hex} updated successfully.")
 
 if __name__ == "__main__":
-    filename = "char_rom.mem"  # Adjust the file path as needed
+    filename = "char_rom_thai.mem"  # Adjust the file path as needed
     edit_char_mem(filename)

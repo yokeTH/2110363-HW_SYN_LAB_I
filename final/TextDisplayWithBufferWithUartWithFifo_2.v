@@ -21,40 +21,45 @@
 
 
 module TextDisplayWithBufferWithUartWithFifo_2 (
-    input  wire       clk,
-    input  wire       btnU,      // Reset
+    input  wire        clk,
+    input  wire        btnU,      // Reset
     // Uart
-    input  wire       RsRx,      // UART receive
-    output wire       RsTx,      // UART transmit
+    input  wire        RsRx,      // UART receive
+    output wire        RsTx,      // UART transmit
     // Vga
-    output wire       Hsync,     // VGA horizontal sync
-    output wire       Vsync,     // VGA vertical sync
-    output wire [3:0] vgaRed,    // VGA red channel
-    output wire [3:0] vgaGreen,  // VGA green channel
-    output wire [3:0] vgaBlue,   // VGA blue channel
+    output wire        Hsync,     // VGA horizontal sync
+    output wire        Vsync,     // VGA vertical sync
+    output wire [ 3:0] vgaRed,    // VGA red channel
+    output wire [ 3:0] vgaGreen,  // VGA green channel
+    output wire [ 3:0] vgaBlue,   // VGA blue channel
     // PS/2 Keyboard
-    input  wire       PS2Clk,
-    input  wire       PS2Data,
+    input  wire        PS2Clk,
+    input  wire        PS2Data,
     // Quad 7 Segments display for Debug KBD
-    output wire [6:0] seg,       // 7-segment display output
-    output wire       dp,        // Decimal point output
-    output wire [3:0] an,        // Anode control for 7-segment display
+    output wire [ 6:0] seg,       // 7-segment display output
+    output wire        dp,        // Decimal point output
+    output wire [ 3:0] an,        // Anode control for 7-segment display
     // Switch
-    input  wire [7:0] sw,
-    input  wire       btnC,
+    input  wire [12:0] sw,
+    input  wire        btnD,
     // 2 device communication
-    output wire       JB,        // TX to other device
-    input  wire       JC         // RX from other device
+    output wire        JB,        // TX to other device
+    input  wire        JC,        // RX from other device
+    // Set Text Color
+    input  wire        btnL,      // SET RED
+    input  wire        btnR,      // SET GREEN
+    input  wire        btnC       // SET BLUE
 );
 
     // ==============================
     // Signal
     // ==============================
 
-    reg lang = 0; // 0 Eng | 1 Thai
-    reg [3:0] textRed = 4'hF;
-    reg [3:0] textGreen = 4'hF;
-    reg [3:0] textBlue = 4'hF;
+    wire       lang = sw[8];  // 0 Eng | 1 Thai
+
+    reg  [3:0] text_red = 4'hF;
+    reg  [3:0] text_green = 4'hF;
+    reg  [3:0] text_blue = 4'hF;
 
     // ==============================
     // UART signals and instances
@@ -113,19 +118,29 @@ module TextDisplayWithBufferWithUartWithFifo_2 (
     // ==============================
     wire        fifo_display_full;
     wire        fifo_display_empty;
-    wire [18:0] fifo_display_din;
-    wire [18:0] fifo_display_dout;
+    wire [31:0] fifo_display_din;
+    wire [31:0] fifo_display_dout;
+    wire [ 3:0] write_text_read;
+    wire [ 3:0] write_text_green;
+    wire [ 3:0] write_text_blue;
+    wire        write_lang;
     reg         fifo_display_wr_en;
     reg         fifo_display_rd_en;
 
     // Pack data and coordinates into display FIFO data
     reg  [ 6:0] fifo_pos_data;
-    assign fifo_display_din = {fifo_pos_data[6:0], current_x, current_y};
+    assign fifo_display_din = {
+        text_red, text_green, text_blue, lang, fifo_pos_data[6:0], current_x, current_y
+    };
 
     // Extract data from display FIFO output
-    assign write_data       = fifo_display_dout[18:12];
-    assign write_x          = fifo_display_dout[11:5];
-    assign write_y          = fifo_display_dout[4:0];
+    assign write_text_read = fifo_display_dout[31:28];
+    assign write_text_green = fifo_display_dout[27:24];
+    assign write_text_blue = fifo_display_dout[23:20];
+    assign write_lang = fifo_display_dout[19];
+    assign write_data = fifo_display_dout[18:12];
+    assign write_x = fifo_display_dout[11:5];
+    assign write_y = fifo_display_dout[4:0];
 
     // FIFO instance for display
     fifo_generator_0 fifo_display (
@@ -144,14 +159,16 @@ module TextDisplayWithBufferWithUartWithFifo_2 (
     // ==============================
     wire        fifo_output_full;
     wire        fifo_output_empty;
-    wire [18:0] fifo_output_din;  // Changed to 19 bits to match fifo_generator_0
-    wire [18:0] fifo_output_dout;  // Changed to 19 bits to match fifo_generator_0
+    wire [31:0] fifo_output_din;  // {red4, green4, blue4, lang1, data7, x7, y5}
+    wire [31:0] fifo_output_dout;
     reg         fifo_output_wr_en;
     reg         fifo_output_rd_en;
 
     // Pack tx_data into the 19-bit FIFO data format
     // We'll use only the upper 8 bits and pad the rest with zeros
-    assign fifo_output_din = {tx_data[6:0], 12'b0};  // Pack 8-bit data into MSB, pad with zeros
+    assign fifo_output_din = {
+        13'b0, tx_data[6:0], 12'b0
+    };  // Pack 8-bit data into MSB, pad with zeros
 
     // Extract only the upper 8 bits from FIFO output for transmission
     wire [7:0] fifo_output_data = {0, fifo_output_dout[18:12]};  // Extract character data from MSB
@@ -167,8 +184,6 @@ module TextDisplayWithBufferWithUartWithFifo_2 (
         .full (fifo_output_full),
         .empty(fifo_output_empty)
     );
-
-
 
     // ==============================
     // PS/2 Keyboard Instance
@@ -199,17 +214,17 @@ module TextDisplayWithBufferWithUartWithFifo_2 (
     );
 
     // ==============================
-    // Button C synchronization
+    // Button D synchronization
     // ==============================
-    reg btnC_1, btnC_2;
-    wire btnC_pulse;
+    reg btnD_1, btnD_2;
+    wire btnD_pulse;
 
     always @(posedge clk) begin
-        btnC_1 <= btnC;
-        btnC_2 <= btnC_1;
+        btnD_1 <= btnD;
+        btnD_2 <= btnD_1;
     end
 
-    assign btnC_pulse = btnC_1 & ~btnC_2;
+    assign btnD_pulse = btnD_1 & ~btnD_2;
 
     // ==============================
     // Cross-device Communication
@@ -265,19 +280,75 @@ module TextDisplayWithBufferWithUartWithFifo_2 (
     // Text Display Instance
     // ==============================
     TextDisplayWithBuffer display (
-        .clk         (clk),
-        .reset       (btnU),
-        .write_enable(write_enable),
-        .write_x     (write_x),
-        .write_y     (write_y),
-        .write_data  (write_data),
-        .busy        (buffer_busy),
-        .Hsync       (Hsync),
-        .Vsync       (Vsync),
-        .vgaRed      (vgaRed),
-        .vgaGreen    (vgaGreen),
-        .vgaBlue     (vgaBlue)
+        .clk             (clk),
+        .reset           (btnU),
+        .write_enable    (write_enable),
+        .write_x         (write_x),
+        .write_y         (write_y),
+        .write_data      (write_data),
+        .write_text_color({write_text_read, write_text_green, write_text_blue}),
+        .write_lang      (write_lang),
+        .busy            (buffer_busy),
+        .Hsync           (Hsync),
+        .Vsync           (Vsync),
+        .vgaRed          (vgaRed),
+        .vgaGreen        (vgaGreen),
+        .vgaBlue         (vgaBlue)
     );
+
+    // ==============================
+    // Text Options State
+    // ==============================
+
+    // Button L synchronization
+    reg btnL_1, btnL_2;
+    wire btnL_pulse;
+
+    always @(posedge clk) begin
+        btnL_1 <= btnL;
+        btnL_2 <= btnL_1;
+    end
+
+    assign btnL_pulse = btnL_1 & ~btnL_2;
+
+    // Button C synchronization
+    reg btnC_1, btnC_2;
+    wire btnC_pulse;
+
+    always @(posedge clk) begin
+        btnC_1 <= btnC;
+        btnC_2 <= btnC_1;
+    end
+
+    assign btnC_pulse = btnC_1 & ~btnC_2;
+
+    // Button R synchronization
+    reg btnR_1, btnR_2;
+    wire btnR_pulse;
+
+    always @(posedge clk) begin
+        btnR_1 <= btnR;
+        btnR_2 <= btnR_1;
+    end
+
+    assign btnR_pulse = btnR_1 & ~btnR_2;
+
+
+    always @(posedge clk) begin
+        if (btnU) begin
+            text_red   <= 4'hF;
+            text_green <= 4'hF;
+            text_blue  <= 4'hF;
+        end else begin
+            if (btnL_pulse) begin
+                text_red <= sw[12:9];
+            end else if (btnC_pulse) begin
+                text_green <= sw[12:9];
+            end else if (btnR_pulse) begin
+                text_blue <= sw[12:9];
+            end
+        end
+    end
 
     // ==============================
     // State Machines
@@ -308,8 +379,8 @@ module TextDisplayWithBufferWithUartWithFifo_2 (
                         tx_data           <= ascii_code;
                         fifo_output_wr_en <= 1;
                         output_state      <= OUTPUT_PREPARE;
-                    end else if (btnC_pulse && !fifo_output_full) begin
-                        tx_data           <= sw;
+                    end else if (btnD_pulse && !fifo_output_full) begin
+                        tx_data           <= sw[7:0];
                         fifo_output_wr_en <= 1;
                         output_state      <= OUTPUT_PREPARE;
                     end else if (uart_received_pulse && !fifo_output_full) begin
@@ -375,11 +446,11 @@ module TextDisplayWithBufferWithUartWithFifo_2 (
                     case (pmod_data_out)
                         8'h0D: begin  // Carriage return
                             current_x <= 0;
-                            if (current_y < 29) current_y <= current_y + 1;
+                            if (current_y < 19) current_y <= current_y + 1;
                             input_state <= INPUT_IDLE;
                         end
                         8'h0A: begin  // Line feed
-                            if (current_y < 29) current_y <= current_y + 1;
+                            if (current_y < 19) current_y <= current_y + 1;
                             else current_y <= 0;
                             input_state <= INPUT_IDLE;
                         end
@@ -398,10 +469,10 @@ module TextDisplayWithBufferWithUartWithFifo_2 (
                 end
 
                 INPUT_UPDATE: begin
-                    if (current_x < 79) current_x <= current_x + 1;
+                    if (current_x < 59) current_x <= current_x + 1;
                     else begin
                         current_x <= 0;
-                        if (current_y < 29) current_y <= current_y + 1;
+                        if (current_y < 59) current_y <= current_y + 1;
                         else current_y <= 0;
                     end
                     input_state <= INPUT_IDLE;
